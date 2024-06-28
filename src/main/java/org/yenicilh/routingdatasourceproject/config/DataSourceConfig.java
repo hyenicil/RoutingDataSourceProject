@@ -1,45 +1,77 @@
 package org.yenicilh.routingdatasourceproject.config;
 
 
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.jdbc.DataSourceBuilder;
+import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.core.env.Environment;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.springframework.orm.jpa.JpaTransactionManager;
+import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.yenicilh.routingdatasourceproject.entity.UserEntity;
 
 import javax.sql.DataSource;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.Objects;
 
 @Configuration
-@RequiredArgsConstructor
+@EnableJpaRepositories(basePackages = "org.yenicilh.routingdatasourceproject.repository",
+    transactionManagerRef = "transactionManager", entityManagerFactoryRef = "entityManager")
+@EnableTransactionManagement
 public class DataSourceConfig {
 
-    private final Environment env;
+    @Autowired
+    private Environment env;
 
-    public DataSource dataSourceRouter() {
-        Map<Object, Object> targetDataSource = new LinkedHashMap<>();
-        DataSource dataSource1 = DataSourceBuilder.create()
-                .url(env.getProperty("spring.datasource1.url"))
-                .username(env.getProperty("spring.datasource1.username"))
-                .password(env.getProperty("spring.datasource1.password"))
-                .build();
-
-        DataSource dataSource2 = DataSourceBuilder.create()
-                .url(env.getProperty("spring.datasource2.url"))
-                .username(env.getProperty("spring.datasource2.username"))
-                .password(env.getProperty("spring.datasource2.password"))
-                .build();
-
-        targetDataSource.put(ClientDatabase.DB_1, dataSource1);
-        targetDataSource.put(ClientDatabase.DB_2, dataSource2);
-
-        ClientDataSourceRouter router = new ClientDataSourceRouter();
-        router.setTargetDataSources(targetDataSource);
-        router.setDefaultTargetDataSource(dataSource1);
-        return router;
-
-
+    @Bean
+    @Primary
+    public DataSource dataSource() {
+        ClientDataSourceRouter dataSourceRouter = new ClientDataSourceRouter();
+        dataSourceRouter.initDataSource(kilisDataSource(), antepDataSource());
+        return dataSourceRouter;
     }
 
+
+    @Bean(name = "datasource2")
+    @ConfigurationProperties(prefix = "datasource2")
+    public DataSource antepDataSource() {
+        DriverManagerDataSource dataSource = new DriverManagerDataSource();
+        dataSource.setDriverClassName(Objects.requireNonNull(env.getProperty("spring.datasource.driver-class-name")));
+        dataSource.setUrl(env.getProperty("datasource2.url"));
+        dataSource.setUsername(env.getProperty("datasource2.username"));
+        dataSource.setPassword(env.getProperty("datasource2.password"));
+        return dataSource;
+    }
+
+    @Bean(name = "datasource1")
+    @ConfigurationProperties(prefix = "datasource1")
+    public DataSource kilisDataSource() {
+
+        DriverManagerDataSource dataSource = new DriverManagerDataSource();
+        dataSource.setDriverClassName(Objects.requireNonNull(env.getProperty("spring.datasource.driver-class-name")));
+        dataSource.setUrl(env.getProperty("datasource1.url"));
+        dataSource.setUsername(env.getProperty("datasource1.username"));
+        dataSource.setPassword(env.getProperty("datasource1.password"));
+        return dataSource;
+    }
+
+
+    @Bean(name = "entityManager")
+    public LocalContainerEntityManagerFactoryBean entityManagerFactoryBean(EntityManagerFactoryBuilder builder) {
+        return builder.dataSource(dataSource()).packages(UserEntity.class).build();
+    }
+
+    @Bean(name = "transactionManager")
+    public JpaTransactionManager transactionManager(
+    @Autowired @Qualifier("entityManager") LocalContainerEntityManagerFactoryBean entityManagerFactoryBean
+            ) {
+         return new JpaTransactionManager(Objects.requireNonNull(entityManagerFactoryBean.getObject()));
+    }
 
 }

@@ -16,13 +16,7 @@ public class UserService {
 
     private final UserRepository userRepository;
 
-    public List<UserEntity> getUsers(String city) {
-        if(city.equalsIgnoreCase("kilis")) {
-            ClientDatabaseContextHolder.set(ClientDatabase.DB_1);
-        }
-        if (city.equalsIgnoreCase("antep")) {
-            ClientDatabaseContextHolder.set(ClientDatabase.DB_2);
-        }
+    public List<UserEntity> getUsers() {
 
         return userRepository.findAll();
     }

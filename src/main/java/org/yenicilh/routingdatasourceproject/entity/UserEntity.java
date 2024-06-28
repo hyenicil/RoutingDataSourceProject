@@ -11,7 +11,8 @@ import static org.yenicilh.routingdatasourceproject.constant.EntityConstants.*;
 @Getter
 @Setter
 @RequiredArgsConstructor
-@Entity(name = USERENTITY)
+@Entity
+@Table(name = USERENTITY)
 public class UserEntity {
 
     @Id
@@ -23,5 +24,5 @@ public class UserEntity {
     private String username;
 
     @Column(name = CITY_NAME)
-    private String cityName;
+    private String cityname;
 }

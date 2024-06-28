@@ -18,10 +18,8 @@ public class UserController {
 
     private final UserService userService;
 
-
-
-    @GetMapping(CITY)
-    public List<UserEntity> getUsers(@PathVariable("city") String city){
-        return userService.getUsers(city);
+    @GetMapping(value = "intern")
+    public List<UserEntity> getUsers(){
+        return userService.getUsers();
     }
 }
