@@ -1,4 +1,4 @@
-package org.yenicilh.routingdatasourceproject.config.repository;
+package org.yenicilh.routingdatasourceproject.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

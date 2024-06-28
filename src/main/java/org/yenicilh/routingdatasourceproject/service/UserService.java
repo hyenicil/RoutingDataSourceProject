@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.yenicilh.routingdatasourceproject.config.ClientDatabase;
 import org.yenicilh.routingdatasourceproject.config.ClientDatabaseContextHolder;
-import org.yenicilh.routingdatasourceproject.config.repository.UserRepository;
+import org.yenicilh.routingdatasourceproject.repository.UserRepository;
 import org.yenicilh.routingdatasourceproject.entity.UserEntity;
 
 import java.util.List;
